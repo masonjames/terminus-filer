@@ -5,8 +5,8 @@ Terminus Plugin to open Pantheon SFTP Connection in your SFTP Clients
 Adds a sub-command to 'site' which is called 'filer'. This opens a site in your favorite SFTP Client
 
 ## Examples
-* `terminus site filer`
-* `terminus site file --site=companysite-33 --env=dev`
+* `terminus site filer --site=companysite-33 --env=dev --a=transmit`
+* `terminus site filer --site=companysite-33 --env=dev --b=com.panic.transmit`
 * `terminus site transmit --site=companysite-33 --env=dev`
 * `terminus site panic --site=companysite-33 --env=dev`
 * `terminus site cyberduck --site=companysite-33 --env=dev`
