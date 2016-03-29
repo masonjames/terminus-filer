@@ -1,0 +1,9 @@
+{
+  "name": "sean-e-dietrich/terminus-filer",
+  "description": "Filer - A Terminus plugin for SFTP Connections",
+  "homepage": "https://github.com/sean-e-dietrich/terminus-filer",
+  "license": "MIT",
+  "require": {
+    "php": ">=5.4"
+  }
+}
