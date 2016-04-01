@@ -53,9 +53,11 @@ class FilerCommand extends TerminusCommand {
 
     $app = $assoc_args['a'];
     $bundle = $assoc_args['b'];
+    $app_args = $assoc_args['app_args'];
 
     $type = ($app == '' ? 'bundle' : 'app');
     $app = ($app == '' ? $bundle : $app);
+    $app_args = ($app_args == '' ? $app_args : '--args ' . $app_args);
 
     $env_id   = $this->input()->env(array('args' => $assoc_args, 'site' => $site));
     $environment = $site->environments->get($env_id);
@@ -69,12 +71,13 @@ class FilerCommand extends TerminusCommand {
     $environment->wake();
 
     if($type == 'bundle')
-      $connect = 'open -b %s %s';
-    else {
-      $connect = 'open -a %s --args %s';
-    }
+      $type = 'b';
+    else
+      $type = 'a';
 
-    $command = sprintf($connect, $app, $connection);
+    $connect = 'open \-%s %s %s %s';
+
+    $command = sprintf($connect, $type, $app, $app_args, $connection);
     exec($command);
   }
 
@@ -120,6 +123,7 @@ class FilerCommand extends TerminusCommand {
    */
    public function cyberduck($args, $assoc_args) {
      $assoc_args['b'] = 'ch.sudo.cyberduck';
+
      $this->filer($args, $assoc_args);
    }
    
@@ -142,6 +146,7 @@ class FilerCommand extends TerminusCommand {
    */
    public function filezilla($args, $assoc_args) {
      $assoc_args['a'] = 'filezilla';
+     $assoc_args['app_args'] = '-l ask';
      $this->filer($args, $assoc_args);
    }
 }
