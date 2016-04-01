@@ -70,8 +70,9 @@ class FilerCommand extends TerminusCommand {
 
     if($type == 'bundle')
       $connect = 'open -b %s %s';
-    else
-      $connect = 'open -a %s %s';
+    else {
+      $connect = 'open -a %s --args %s';
+    }
 
     $command = sprintf($connect, $app, $connection);
     exec($command);
@@ -97,7 +98,6 @@ class FilerCommand extends TerminusCommand {
    */
    public function transmit($args, $assoc_args) {
      $assoc_args['b'] = 'com.panic.transmit';
-
      $this->filer($args, $assoc_args);
    }
 
@@ -120,6 +120,28 @@ class FilerCommand extends TerminusCommand {
    */
    public function cyberduck($args, $assoc_args) {
      $assoc_args['b'] = 'ch.sudo.cyberduck';
+     $this->filer($args, $assoc_args);
+   }
+   
+   /**
+   * Connects SFTP Client to the Site using FileZilla
+   *
+   * ## OPTIONS
+   *
+   * [--site=<site>]
+   * : Site to Use
+   *
+   * [--env=<env>]
+   * : Environment to clear
+   *
+   * ## EXAMPLES
+   *  terminus site filezilla --site=test
+   *
+   * @subcommand filezilla
+   * @alias zilla
+   */
+   public function filezilla($args, $assoc_args) {
+     $assoc_args['a'] = 'filezilla';
      $this->filer($args, $assoc_args);
    }
 }
