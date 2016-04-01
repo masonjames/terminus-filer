@@ -21,6 +21,10 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 * `terminus site cyberduck --site=companysite-33 --env=dev`
 * `terminus site duck --site=companysite-33 --env=dev`
 
+### Shortcut for FileZilla
+* `terminus site filezilla --site=companysite-33 --env=dev`
+* `terminus site zilla --site=companysite-33 --env=dev`
+
 ## Installation
 For help installing, see [Terminus's Wiki](https://github.com/pantheon-systems/terminus/wiki/Plugins)
 
