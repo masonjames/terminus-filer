@@ -71,6 +71,8 @@ class FilerCommand extends TerminusCommand {
       $this->failure('Bundle not supported.');
     }
 
+    $app_args = isset($assoc_args['app_args']) ? $assoc_args['app_args'] : '';
+
     $type = ($app == '' ? 'b' : 'a');
     $app = ($app == '' ? $bundle : $app);
     $app_args = ($app_args == '' ? $app_args : '--args ' . $app_args);
@@ -91,7 +93,11 @@ class FilerCommand extends TerminusCommand {
         $command = sprintf($connect, $type, $app, $app_args, $connection);
         break;
       case 'LIN';
+        $connect = '%s %s';
+        $command = sprintf($connect, $app, $connection);
+        break;
       case 'WIN':
+        $app = "\"C:\\Program Files (x86)\\FileZilla FTP Client\\{$app}\"";
         $connect = '%s %s';
         $command = sprintf($connect, $app, $connection);
         break;
@@ -125,8 +131,14 @@ class FilerCommand extends TerminusCommand {
    * @alias panic
    */
    public function transmit($args, $assoc_args) {
-     $assoc_args['b'] = 'com.panic.transmit';
-     $this->filer($args, $assoc_args);
+     $os = strtoupper(substr(PHP_OS, 0, 3));
+     if ($os == 'DAR') {
+       $assoc_args['b'] = 'com.panic.transmit';
+       $this->filer($args, $assoc_args);
+     }
+     else {
+       $this->failure('Operating system not supported.');
+     }
    }
 
    /**
@@ -147,8 +159,14 @@ class FilerCommand extends TerminusCommand {
    * @alias duck
    */
    public function cyberduck($args, $assoc_args) {
-     $assoc_args['b'] = 'ch.sudo.cyberduck';
-     $this->filer($args, $assoc_args);
+     $os = strtoupper(substr(PHP_OS, 0, 3));
+     if ($os == 'DAR') {
+       $assoc_args['b'] = 'ch.sudo.cyberduck';
+       $this->filer($args, $assoc_args);
+     }
+     else {
+       $this->failure('Operating system not supported.');
+     }
    }
 
    /**
