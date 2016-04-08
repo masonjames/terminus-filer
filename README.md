@@ -1,10 +1,8 @@
 # Filer
 
-Terminus Plugin to open Pantheon SFTP Connection in your SFTP Clients
+Terminus plugin to open Pantheon Sites using an FTP Client
 
 Adds a sub-command to 'site' which is called 'filer'. This opens a site in your favorite SFTP Client. Currently at the moment Panic's Transmit and Cyberduck have been built in as shortcuts.
-
-*This plugin will currently only work on OS X*
 
 ## Examples
 ### Reference Application Name
