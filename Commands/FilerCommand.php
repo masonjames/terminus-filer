@@ -7,17 +7,58 @@ use Terminus\Exceptions\TerminusException;
 use Terminus\Models\Collections\Sites;
 use Terminus\Utils;
 
-$program_files = 'Program Files';
-if (Utils\isWindows()) {
-  $arch = getenv('PROCESSOR_ARCHITECTURE');
-  if ($arch == 'x86') {
-    $program_files = 'Program Files (x86)';
-  }
+// Get environment variables, if available
+$bitkinex = getenv('TERMINUS_FILER_BITKINEX_CMD');
+$cyberduck = getenv('TERMINUS_FILER_CYBERDUCK_CMD');
+$filezilla = getenv('TERMINUS_FILER_FILEZILLA_CMD');
+$winscp = getenv('TERMINUS_FILER_WINSCP_CMD');
+// Operating system specific checks
+define('OS', strtoupper(substr(PHP_OS, 0, 3)));
+switch (OS) {
+  case 'DAR':
+  case 'LIN':
+    if (!$filezilla) {
+      $filezilla = 'filezilla';
+    }
+    define('FILEZILLA', $filezilla);
+    $supported_apps = array(
+      '',
+      FILEZILLA,
+    );
+      break;
+  case 'WIN':
+    $program_files = 'Program Files';
+    $arch = getenv('PROCESSOR_ARCHITECTURE');
+    if ($arch == 'x86') {
+      $program_files = 'Program Files (x86)';
+    }
+    if (!$bitkinex) {
+      $bitkinex = "C:\\{$program_files}\\BitKinex\\bitkinex.exe";
+    }
+    if (!$cyberduck) {
+      $cyberduck = "C:\\{$program_files}\\Cyberduck\\Cyberduck.exe";
+    }
+    if (!$filezilla) {
+      $filezilla = "C:\\{$program_files}\\FileZilla FTP Client\\filezilla.exe";
+    }
+    if (!$winscp) {
+      $winscp = "C:\\{$program_files}\\WinSCP\\WinSCP.exe";
+    }
+    define('BITKINEX',  "\"$bitkinex\" browse");
+    define('CYBERDUCK', "\"$cyberduck\"");
+    define('FILEZILLA', "\"$filezilla\"");
+    define('WINSCP',    "\"$winscp\"");
+    $supported_apps = array(
+      '',
+      BITKINEX,
+      CYBERDUCK,
+      FILEZILLA,
+      WINSCP,
+    );
+      break;
+  default:
+    $this->failure('Operating system not supported.');
 }
-define('BITKINEX', "\"C:\\{$program_files}\\BitKinex\\bitkinex.exe\" browse");
-define('CYBERDUCK', "\"C:\\{$program_files}\\Cyberduck\\Cyberduck.exe\"");
-define('FILEZILLA', "\"C:\\{$program_files}\\FileZilla FTP Client\\filezilla.exe\"");
-define('WINSCP', "\"C:\\{$program_files}\\WinSCP\\WinSCP.exe\"");
 
 /**
  * Opens the Site using an SFTP Client
@@ -65,14 +106,6 @@ class FilerCommand extends TerminusCommand {
       $this->input()->siteName(array('args' => $assoc_args))
     );
 
-    $supported_apps = array(
-      '',
-      'filezilla',
-      BITKINEX,
-      CYBERDUCK,
-      FILEZILLA,
-      WINSCP,
-    );
     $app = isset($assoc_args['a']) ? $assoc_args['a'] : '';
     if (!in_array($app, $supported_apps)) {
       $this->failure('App not supported.');
@@ -101,29 +134,32 @@ class FilerCommand extends TerminusCommand {
 
     $this->log()->info('Opening {site} in {app}', array('site' => $site->get('name'), 'app' => $app));
 
-    // Operating system specific checks.
-    $os = strtoupper(substr(PHP_OS, 0, 3));
-    switch ($os) {
+    // Operating system specific checks
+    switch (OS) {
       case 'DAR':
         if ($app_args) {
           $app_args = "--args $app_args";
         }
-        $connect = 'open \-%s %s %s %s';
-        $command = sprintf($connect, $type, $app, $app_args, $connection);
+        $connect = 'open \-%s %s %s %s %s';
+        $redirect = '> /dev/null 2> /dev/null &';
+        $command = sprintf($connect, $type, $app, $app_args, $connection, $redirect);
         break;
       case 'LIN';
-      case 'WIN':
-        $connect = '%s %s %s';
-        $command = sprintf($connect, $app, $app_args, $connection);
+        $connect = '%s %s %s %s %s';
+        $redirect = '> /dev/null 2> /dev/null &';
+        $command = sprintf($connect, $app, $app_args, $connection, $redirect);
         break;
-      default:
-        $this->failure('Operating system not supported.');
+      case 'WIN':
+        $connect = '%s %s %s %s %s';
+        $redirect = '> NUL 2> NUL'
+        $command = sprintf($connect, $app, $app_args, $connection, $redirect);
+        break;
     }
 
-    // Wake the Site.
+    // Wake the Site
     $environment->wake();
 
-    // Open the Site in app/bundle.
+    // Open the Site in app/bundle
     exec($command);
   }
 
@@ -145,8 +181,7 @@ class FilerCommand extends TerminusCommand {
    * @alias panic
    */
   public function transmit($args, $assoc_args) {
-    $os = strtoupper(substr(PHP_OS, 0, 3));
-    if ($os != 'DAR') {
+    if (OS != 'DAR') {
       $this->failure('Operating system not supported.');
     }
     $assoc_args['b'] = 'com.panic.transmit';
@@ -171,8 +206,7 @@ class FilerCommand extends TerminusCommand {
    * @alias duck
    */
   public function cyberduck($args, $assoc_args) {
-    $os = strtoupper(substr(PHP_OS, 0, 3));
-    switch ($os) {
+    switch (OS) {
       case 'DAR':
         $assoc_args['b'] = 'ch.sudo.cyberduck';
           break;
@@ -204,12 +238,7 @@ class FilerCommand extends TerminusCommand {
    * @alias zilla
    */
   public function filezilla($args, $assoc_args) {
-    if (Utils\isWindows()) {
-      $app = FILEZILLA;
-    } else {
-      $app = 'filezilla';
-    }
-    $assoc_args['a'] = $app;
+    $assoc_args['a'] = FILEZILLA;
     $assoc_args['app_args'] = '-l ask';
     $this->filer($args, $assoc_args);
   }
