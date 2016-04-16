@@ -1,8 +1,16 @@
 # Filer
 
-Terminus plugin to open Pantheon Sites using an FTP Client
+Terminus plugin to open Pantheon Sites using an SFTP Client
 
-Adds a sub-command to 'site' which is called 'filer'. This opens a site in your favorite SFTP Client. Currently at the moment Panic's Transmit and Cyberduck have been built in as shortcuts.
+Adds a sub-command to 'site' which is called 'filer'. This opens a site in your favorite SFTP Client.
+
+## Supported
+
+[Transmit](https://panic.com/transmit/) (Mac only)
+[Cyberduck](https://cyberduck.io/) (Mac and Windows)
+[Filezilla](https://filezilla-project.org/) (Mac, Linux and Windows)
+[BitKinex](http://www.bitkinex.com/) (Windows only)
+[WinSCP](https://winscp.net/) (Windows only)
 
 ## Examples
 ### Reference Application Name
@@ -22,6 +30,14 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 ### Shortcut for FileZilla
 * `terminus site filezilla --site=companysite-33 --env=dev`
 * `terminus site zilla --site=companysite-33 --env=dev`
+
+### Shortcut for BitKinex
+* `terminus site bitkinex --site=companysite-33 --env=dev`
+* `terminus site bit --site=companysite-33 --env=dev`
+
+### Shortcut for WinSCP
+* `terminus site winscp --site=companysite-33 --env=dev`
+* `terminus site scp --site=companysite-33 --env=dev`
 
 ## Installation
 For help installing, see [Terminus's Wiki](https://github.com/pantheon-systems/terminus/wiki/Plugins)
