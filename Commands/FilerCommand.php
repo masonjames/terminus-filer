@@ -21,10 +21,10 @@ switch (OS) {
       $filezilla = 'filezilla';
     }
     define('FILEZILLA', $filezilla);
-    $supported_apps = array(
+    define('SUPPORTED_APPS', array(
       '',
       FILEZILLA,
-    );
+    ));
       break;
   case 'WIN':
     $program_files = 'Program Files';
@@ -48,13 +48,13 @@ switch (OS) {
     define('CYBERDUCK', "\"$cyberduck\"");
     define('FILEZILLA', "\"$filezilla\"");
     define('WINSCP',    "\"$winscp\"");
-    $supported_apps = array(
+    define('SUPPORTED_APPS', array(
       '',
       BITKINEX,
       CYBERDUCK,
       FILEZILLA,
       WINSCP,
-    );
+    ));
       break;
   default:
     $this->failure('Operating system not supported.');
@@ -107,7 +107,7 @@ class FilerCommand extends TerminusCommand {
     );
 
     $app = isset($assoc_args['a']) ? $assoc_args['a'] : '';
-    if (!in_array($app, $supported_apps)) {
+    if (!in_array($app, SUPPORTED_APPS)) {
       $this->failure('App not supported.');
     }
 
