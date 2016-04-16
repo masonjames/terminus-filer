@@ -68,11 +68,9 @@ class FilerCommand extends TerminusCommand {
     $supported_apps = array(
       '',
       'filezilla',
-      'bitkinex',
-      'winscp',
+      BITKINEX,
       CYBERDUCK,
       FILEZILLA,
-      BITKINEX,
       WINSCP,
     );
     $app = isset($assoc_args['a']) ? $assoc_args['a'] : '';
