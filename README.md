@@ -7,9 +7,13 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 ## Supported
 
 [Transmit](https://panic.com/transmit/) (Mac only)
+
 [Cyberduck](https://cyberduck.io/) (Mac and Windows)
+
 [Filezilla](https://filezilla-project.org/) (Mac, Linux and Windows)
+
 [BitKinex](http://www.bitkinex.com/) (Windows only)
+
 [WinSCP](https://winscp.net/) (Windows only)
 
 ## Examples
