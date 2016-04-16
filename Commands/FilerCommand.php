@@ -151,7 +151,7 @@ class FilerCommand extends TerminusCommand {
         break;
       case 'WIN':
         $connect = '%s %s %s %s %s';
-        $redirect = '> NUL 2> NUL'
+        $redirect = '> NUL 2> NUL';
         $command = sprintf($connect, $app, $app_args, $connection, $redirect);
         break;
     }
