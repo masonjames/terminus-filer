@@ -48,10 +48,7 @@ For help installing, see [Terminus's Wiki](https://github.com/pantheon-systems/t
 
 ## Windows
 
-Enviroment variables are available for Windows SFTP clients installed outside the standard `Program Files` directory.
-
-Environment variables:
-
+Enviroment variables are available for Windows SFTP clients installed outside the standard `Program Files` directory:
 ```
 BitKinex - TERMINUS_FILER_BITKINEX_LOC
 
@@ -62,7 +59,9 @@ FileZilla - TERMINUS_FILER_FILEZILLA_LOC
 WinSCP - TERMINUS_FILER_WINSCP_LOC
 ```
 
-Make sure to include the full path to the executable (including the executable itself).  Example: `TEMINUS_FILER_BITKINEX_LOC="C:\BitKinex\bitkinex.exe"`
+Make sure to include the full path to the executable (including the executable itself).
+
+Example: `TEMINUS_FILER_BITKINEX_LOC="C:\BitKinex\bitkinex.exe"`
 
 See http://www.computerhope.com/issues/ch000549.htm for information on how to set environment variables in Windows.
 
