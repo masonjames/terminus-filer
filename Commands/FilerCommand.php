@@ -8,10 +8,10 @@ use Terminus\Models\Collections\Sites;
 use Terminus\Utils;
 
 // Get environment variables, if available
-$bitkinex = getenv('TERMINUS_FILER_BITKINEX_CMD');
-$cyberduck = getenv('TERMINUS_FILER_CYBERDUCK_CMD');
-$filezilla = getenv('TERMINUS_FILER_FILEZILLA_CMD');
-$winscp = getenv('TERMINUS_FILER_WINSCP_CMD');
+$bitkinex = getenv('TERMINUS_FILER_BITKINEX_LOC');
+$cyberduck = getenv('TERMINUS_FILER_CYBERDUCK_LOC');
+$filezilla = getenv('TERMINUS_FILER_FILEZILLA_LOC');
+$winscp = getenv('TERMINUS_FILER_WINSCP_LOC');
 // Operating system specific checks
 define('OS', strtoupper(substr(PHP_OS, 0, 3)));
 switch (OS) {
