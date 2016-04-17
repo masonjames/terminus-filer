@@ -95,6 +95,9 @@ class FilerCommand extends TerminusCommand {
    * [--b=<bundle>]
    * : Bundle Identifier (optional)
    *
+   * [--p=<true|false>]
+   * : Whether to persist the connection
+   *
    * ## EXAMPLES
    *  terminus site filer --site=test
    *
@@ -122,16 +125,42 @@ class FilerCommand extends TerminusCommand {
       $this->failure('Bundle not supported.');
     }
 
+    $persist = isset($assoc_args['p']) ? $assoc_args['p'] : false;
+
     $app_args = isset($assoc_args['app_args']) ? $assoc_args['app_args'] : '';
 
     $type = ($app == '' ? 'b' : 'a');
     $app = ($app == '' ? $bundle : $app);
 
-    $env_id = $this->input()->env(array('args' => $assoc_args, 'site' => $site));
-    $environment = $site->environments->get($env_id);
+    $env = $this->input()->env(array('args' => $assoc_args, 'site' => $site));
+    $environment = $site->environments->get($env);
     $connection_info = $environment->connectionInfo();
 
-    $connection = $connection_info['sftp_url'];
+    if ($persist) {
+      $name = $env . '-' . $site->get('name');
+      $id = substr(md5($name), 0, 8) . '-' . $site->get('id');
+      $connection_info['id'] = $id;
+      $connection_info['domain'] = $name . '.pantheon.io';
+      $connection_info['timestamp'] = time();
+      if (stripos($app, 'cyberduck')) {
+        switch (OS) {
+          case 'DAR':
+            $bookmark_file = getenv('HOME') . '/Library/Application Support/Cyberduck/' . $id . '.duck';
+              break;
+          case 'WIN':
+            $bookmark_file = getenv('HOMEPATH') . '\\AppData\\Roaming\\Cyberduck\\Bookmarks\\' . $id . '.duck';
+              break;
+          default:
+            $this->failure('Operating system not supported.');
+        }
+        $bookmark_xml = $this->getBookmarkXml($connection_info);
+        if ($this->writeXml($bookmark_file, $bookmark_xml)) {
+          $connection = $bookmark_file;
+        }
+      }
+    } else {
+      $connection = $connection_info['sftp_url'];
+    }
 
     $this->log()->info('Opening {site} in {app}', array('site' => $site->get('name'), 'app' => $app));
 
@@ -146,14 +175,13 @@ class FilerCommand extends TerminusCommand {
         $command = sprintf($connect, $type, $app, $app_args, $connection, $redirect);
         break;
       case 'LIN';
-        $connect = '%s %s %s %s %s';
+        $connect = '%s %s %s %s';
         $redirect = '> /dev/null 2> /dev/null &';
         $command = sprintf($connect, $app, $app_args, $connection, $redirect);
         break;
       case 'WIN':
-        $connect = '%s %s %s %s %s';
-        $redirect = '> NUL 2> NUL';
-        $command = sprintf($connect, $app, $app_args, $connection, $redirect);
+        $connect = 'start /b %s %s %s';
+        $command = sprintf($connect, $app, $app_args, $connection);
         break;
     }
 
@@ -161,6 +189,7 @@ class FilerCommand extends TerminusCommand {
     $environment->wake();
 
     // Open the Site in app/bundle
+echo "$command\n";
     exec($command);
   }
 
@@ -210,9 +239,11 @@ class FilerCommand extends TerminusCommand {
     switch (OS) {
       case 'DAR':
         $assoc_args['b'] = 'ch.sudo.cyberduck';
+        $assoc_args['p'] = true;
           break;
       case 'WIN':
         $assoc_args['a'] = CYBERDUCK;
+        $assoc_args['p'] = true;
           break;
       case 'LIN':
       default:
@@ -292,5 +323,57 @@ class FilerCommand extends TerminusCommand {
     }
     $assoc_args['a'] = WINSCP;
     $this->filer($args, $assoc_args);
+  }
+
+  /**
+   * XML for Cyberduck bookmark file
+   *
+   * @param array Connection information
+   * @return string XML bookmark file content
+   */
+  private function getBookmarkXml($ci) {
+    return <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Protocol</key>
+  <string>sftp</string>
+  <key>Nickname</key>
+  <string>{$ci['domain']}</string>
+  <key>UUID</key>
+  <string>{$ci['id']}</string>
+  <key>Hostname</key>
+  <string>{$ci['sftp_host']}</string>
+  <key>Port</key>
+  <string>{$ci['git_port']}</string>
+  <key>Username</key>
+  <string>{$ci['sftp_username']}</string>
+  <key>Path</key>
+  <string></string>
+  <key>Access Timestamp</key>
+  <string>{$ci['timestamp']}</string>
+</dict>
+</plist>
+XML;
+  }
+
+  /**
+   * Write the XML to the configuration file
+   *
+   * @param string $file XML configuration file
+   * @param string $data XML configuration data
+   * @return bool True if writing to the file was successful
+   */
+  private function writeXml($file, $data) {
+    try {
+      $handle = fopen($file, "w");
+      fwrite($handle, $data);
+      fclose($handle);
+    } catch (Exception $e) {
+      $this->failure($e->getMessage());
+      return false;
+    }
+    return true;
   }
 }
