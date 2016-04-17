@@ -25,22 +25,27 @@ Adds a sub-command to 'site' which is called 'filer'. This opens a site in your 
 
 ### Shortcut for Panic's Transmit
 `$ terminus site transmit --site=companysite-33 --env=dev`
+
 `$ terminus site panic --site=companysite-33 --env=dev`
 
 ### Shortcut for Cyberduck
 `$ terminus site cyberduck --site=companysite-33 --env=dev`
+
 `$ terminus site duck --site=companysite-33 --env=dev`
 
 ### Shortcut for FileZilla
 `$ terminus site filezilla --site=companysite-33 --env=dev`
+
 `$ terminus site zilla --site=companysite-33 --env=dev`
 
 ### Shortcut for BitKinex
 `$ terminus site bitkinex --site=companysite-33 --env=dev`
+
 `$ terminus site bit --site=companysite-33 --env=dev`
 
 ### Shortcut for WinSCP
 `$ terminus site winscp --site=companysite-33 --env=dev`
+
 `$ terminus site scp --site=companysite-33 --env=dev`
 
 ## Installation
