@@ -135,12 +135,12 @@ class FilerCommand extends TerminusCommand {
     $env = $this->input()->env(array('args' => $assoc_args, 'site' => $site));
     $environment = $site->environments->get($env);
     $connection_info = $environment->connectionInfo();
+    $domain = $env . '-' . $site->get('name') . '.pantheon.io';
 
     if ($persist) {
-      $name = $env . '-' . $site->get('name');
-      $id = substr(md5($name), 0, 8) . '-' . $site->get('id');
+      $id = substr(md5($domain), 0, 8) . '-' . $site->get('id');
       $connection_info['id'] = $id;
-      $connection_info['domain'] = $name . '.pantheon.io';
+      $connection_info['domain'] = $domain;
       $connection_info['timestamp'] = time();
       if (stripos($app, 'cyberduck')) {
         switch (OS) {
@@ -161,8 +161,6 @@ class FilerCommand extends TerminusCommand {
     } else {
       $connection = $connection_info['sftp_url'];
     }
-
-    $this->log()->info('Opening {site} in {app}', array('site' => $site->get('name'), 'app' => $app));
 
     // Operating system specific checks
     switch (OS) {
@@ -186,10 +184,11 @@ class FilerCommand extends TerminusCommand {
     }
 
     // Wake the Site
+    $this->log()->info('Opening {domain} in {app}', array('domain' => $domain, 'app' => $app));
     $environment->wake();
 
     // Open the Site in app/bundle
-echo "$command\n";
+    $this->log()->info($command);
     exec($command);
   }
 
