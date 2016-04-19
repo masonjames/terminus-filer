@@ -21,10 +21,11 @@ switch (OS) {
       $filezilla = 'filezilla';
     }
     define('FILEZILLA', $filezilla);
-    define('SUPPORTED_APPS', serialize(array(
-      '',
-      FILEZILLA,
-    )));
+    define(
+      'SUPPORTED_APPS', serialize(
+        array('', FILEZILLA)
+      )
+    );
       break;
   case 'WIN':
     $program_files = 'Program Files';
@@ -44,17 +45,21 @@ switch (OS) {
     if (!$winscp) {
       $winscp = "C:\\{$program_files}\\WinSCP\\WinSCP.exe";
     }
-    define('BITKINEX',  "\"$bitkinex\" browse");
+    define('BITKINEX', "\"$bitkinex\" browse");
     define('CYBERDUCK', "\"$cyberduck\"");
     define('FILEZILLA', "\"$filezilla\"");
-    define('WINSCP',    "\"$winscp\"");
-    define('SUPPORTED_APPS', serialize(array(
-      '',
-      BITKINEX,
-      CYBERDUCK,
-      FILEZILLA,
-      WINSCP,
-    )));
+    define('WINSCP', "\"$winscp\"");
+    define(
+      'SUPPORTED_APPS', serialize(
+        array(
+          '',
+          BITKINEX,
+          CYBERDUCK,
+          FILEZILLA,
+          WINSCP,
+        )
+      )
+    );
       break;
   default:
     $this->failure('Operating system not supported.');
@@ -72,10 +77,11 @@ class FilerCommand extends TerminusCommand {
    * @param array $options
    * @return FilerCommand
    */
+
   public function __construct(array $options = []) {
     $options['require_login'] = true;
-     parent::__construct($options);
-     $this->sites = new Sites();
+    parent::__construct($options);
+    $this->sites = new Sites();
   }
 
   /**
@@ -109,8 +115,11 @@ class FilerCommand extends TerminusCommand {
       $this->input()->siteName(array('args' => $assoc_args))
     );
 
-    $app = isset($assoc_args['a']) ? $assoc_args['a'] : '';
     $supported_apps = unserialize(SUPPORTED_APPS);
+    $app = '';
+    if (isset($assoc_args['a'])) {
+      $app = $assoc_args['a'];
+    }
     if (!in_array($app, $supported_apps)) {
       $this->failure('App not supported.');
     }
@@ -120,17 +129,30 @@ class FilerCommand extends TerminusCommand {
       'com.panic.transmit',
       'ch.sudo.cyberduck',
     );
-    $bundle = isset($assoc_args['b']) ? $assoc_args['b'] : '';
+    $bundle = '';
+    if (isset($assoc_args['b'])) {
+      $bundle = $assoc_args['b'];
+    }
     if (!in_array($bundle, $supported_bundles)) {
       $this->failure('Bundle not supported.');
     }
 
-    $persist = isset($assoc_args['p']) ? $assoc_args['p'] : false;
+    $persist = false;
+    if (isset($assoc_args['p'])) {
+      $persist = $assoc_args['p'];
+    }
 
-    $app_args = isset($assoc_args['app_args']) ? $assoc_args['app_args'] : '';
+    $app_args = '';
+    if (isset($assoc_args['app_args'])) {
+      $app_args = $assoc_args['app_args'];
+    }
 
-    $type = ($app == '' ? 'b' : 'a');
-    $app = ($app == '' ? $bundle : $app);
+    $type = 'b';
+    if ($app) {
+      $type = 'a';
+    } else {
+      $app = $bundle;
+    }
 
     $env = $this->input()->env(array('args' => $assoc_args, 'site' => $site));
     $environment = $site->environments->get($env);
@@ -138,17 +160,17 @@ class FilerCommand extends TerminusCommand {
     $domain = $env . '-' . $site->get('name') . '.pantheon.io';
 
     if ($persist) {
+      // Additional connection information
       $id = substr(md5($domain), 0, 8) . '-' . $site->get('id');
       $connection_info['id'] = $id;
       $connection_info['domain'] = $domain;
       $connection_info['timestamp'] = time();
+      // Persistent Cyberduck bookmark instance
       if (stripos($app, 'cyberduck')) {
         switch (OS) {
-          case 'DAR':
-            $bookmark_file = getenv('HOME') . '/Library/Application Support/Cyberduck/' . $id . '.duck';
-              break;
           case 'WIN':
-            $bookmark_file = getenv('HOMEPATH') . '\\AppData\\Roaming\\Cyberduck\\Bookmarks\\' . $id . '.duck';
+            $bookmark_file = getenv('HOMEPATH')
+              . '\\AppData\\Roaming\\Cyberduck\\Bookmarks\\' . $id . '.duck';
               break;
           default:
             $this->failure('Operating system not supported.');
@@ -168,28 +190,32 @@ class FilerCommand extends TerminusCommand {
         if ($app_args) {
           $app_args = "--args $app_args";
         }
-        $connect = 'open \-%s %s %s %s %s';
-        $redirect = '> /dev/null 2> /dev/null &';
-        $command = sprintf($connect, $type, $app, $app_args, $connection, $redirect);
-        break;
+        $connect = 'open -%s %s %s %s';
+        $command = sprintf($connect, $type, $app, $app_args, $connection);
+          break;
       case 'LIN';
         $connect = '%s %s %s %s';
         $redirect = '> /dev/null 2> /dev/null &';
         $command = sprintf($connect, $app, $app_args, $connection, $redirect);
-        break;
+          break;
       case 'WIN':
         $connect = 'start /b %s %s %s';
         $command = sprintf($connect, $app, $app_args, $connection);
-        break;
+          break;
     }
 
+    $this->log()->info(
+      'Opening {domain} in {app}', array('domain' => $domain, 'app' => $app)
+    );
+
     // Wake the Site
-    $this->log()->info('Opening {domain} in {app}', array('domain' => $domain, 'app' => $app));
     $environment->wake();
 
     // Open the Site in app/bundle
     $this->log()->info($command);
-    exec($command);
+    if ($this->validCommand($app)) {
+      exec($command);
+    }
   }
 
   /**
@@ -238,7 +264,6 @@ class FilerCommand extends TerminusCommand {
     switch (OS) {
       case 'DAR':
         $assoc_args['b'] = 'ch.sudo.cyberduck';
-        $assoc_args['p'] = true;
           break;
       case 'WIN':
         $assoc_args['a'] = CYBERDUCK;
@@ -375,4 +400,47 @@ XML;
     }
     return true;
   }
+
+  /**
+   * Executable file validation
+   *
+   * @param string $file Full path to the executable file
+   * @return bool True or false based on the file execution status
+   */
+  private function validCommand($file = '') {
+    if (!$file) {
+      return false;
+    }
+    switch (OS) {
+      case 'DAR':
+        switch ($file) {
+          case 'ch.sudo.cyberduck':
+            $file = '/Applications/Cyberduck.app/Contents/MacOS/Cyberduck';
+              break;
+          case 'com.panic.transmit':
+            $file = '/Applications/Transmit.app/Contents/MacOS/Transmit';
+              break;
+          case 'filezilla':
+            $file = '/Applications/FileZilla.app/Contents/MacOS/filezilla';
+              break;
+        }
+      case 'LIN':
+        switch ($file) {
+          case 'filezilla':
+            $file = '/usr/bin/filezilla';
+              break;
+        }
+          break;
+    }
+    if (!file_exists($file)) {
+      $this->failure("$file does not exist.");
+      return false;
+    }
+    if (!is_executable($file)) {
+      $this->failure("$file is not executable.");
+      return false;
+    }
+    return true;
+  }
+
 }
