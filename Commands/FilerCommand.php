@@ -34,18 +34,18 @@ switch (OS) {
       $program_files = 'Program Files (x86)';
     }
     if (!$bitkinex) {
-      $bitkinex = "C:\\{$program_files}\\BitKinex\\bitkinex.exe";
+      $bitkinex = "\\{$program_files}\\BitKinex\\bitkinex.exe";
     }
     if (!$cyberduck) {
-      $cyberduck = "C:\\{$program_files}\\Cyberduck\\Cyberduck.exe";
+      $cyberduck = "\\{$program_files}\\Cyberduck\\Cyberduck.exe";
     }
     if (!$filezilla) {
-      $filezilla = "C:\\{$program_files}\\FileZilla FTP Client\\filezilla.exe";
+      $filezilla = "\\{$program_files}\\FileZilla FTP Client\\filezilla.exe";
     }
     if (!$winscp) {
-      $winscp = "C:\\{$program_files}\\WinSCP\\WinSCP.exe";
+      $winscp = "\\{$program_files}\\WinSCP\\WinSCP.exe";
     }
-    define('BITKINEX', "\"$bitkinex\" browse");
+    define('BITKINEX', "\"$bitkinex\"");
     define('CYBERDUCK', "\"$cyberduck\"");
     define('FILEZILLA', "\"$filezilla\"");
     define('WINSCP', "\"$winscp\"");
@@ -193,13 +193,13 @@ class FilerCommand extends TerminusCommand {
         $connect = 'open -%s %s %s %s';
         $command = sprintf($connect, $type, $app, $app_args, $connection);
           break;
-      case 'LIN';
+      case 'LIN':
         $connect = '%s %s %s %s';
         $redirect = '> /dev/null 2> /dev/null &';
         $command = sprintf($connect, $app, $app_args, $connection, $redirect);
           break;
       case 'WIN':
-        $connect = 'start /b %s %s %s';
+        $connect = 'start "" /b %s %s %s';
         $command = sprintf($connect, $app, $app_args, $connection);
           break;
     }
@@ -321,6 +321,7 @@ class FilerCommand extends TerminusCommand {
       $this->failure('Operating system not supported.');
     }
     $assoc_args['a'] = BITKINEX;
+    $assoc_args['app_args'] = 'browse';
     $this->filer($args, $assoc_args);
   }
 
@@ -432,12 +433,9 @@ XML;
         }
           break;
     }
-    if (!file_exists($file)) {
+    exec("ls $file", $output);
+    if (empty($output)) {
       $this->failure("$file does not exist.");
-      return false;
-    }
-    if (!is_executable($file)) {
-      $this->failure("$file is not executable.");
       return false;
     }
     return true;
